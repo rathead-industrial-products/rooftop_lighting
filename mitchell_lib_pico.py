@@ -125,7 +125,7 @@ def roscGetDrive():
     '''Returns a tuple of strength 0-3 for each stage 0-7'''
     a = getRegister(ROSC_BASE+ROSC_FREQA)        
     b = getRegister(ROSC_BASE+ROSC_FREQB)
-    rslt = (a & 0x03, a & 0x0c >> 2, a & 0x30 >> 4, a & 0xc0 >> 6, b & 0x03, b & 0x0c >> 2, b & 0x30 >> 4, b & 0xc0 >> 6)
+    rslt = (a & 0x000f, (a & 0x00f0) >> 4, (a & 0x0300) >> 8, (a & 0x3000) >> 12, b & 0x000f, (b & 0x00f0) >> 4, (b & 0x0f00) >> 8, (b & 0xf000) >> 12)
     return (rslt)
 
 def roscSetDrive(stage, strength):
@@ -136,13 +136,16 @@ def roscSetDrive(stage, strength):
     '''
     assert (stage >= 0 and stage <= 7 and strength >= 0 and strength <=3)
     if (stage <=3):
-        mask = 0x0000ffff & (~0x03 << stage)        # clear passwd and target stage, keep other stages
+        stage_shift = 4 * stage
+        mask = 0x0000ffff & (~(0x0f << stage_shift))        # clear passwd and target stage, keep other stages
         cur = getRegister(ROSC_BASE+ROSC_FREQA) & mask
-        setRegister(ROSC_BASE+ROSC_FREQA, 0x96960000 | cur | (strength << stage))        
+        setRegister(ROSC_BASE+ROSC_FREQA, 0x96960000 | cur | (strength << stage_shift))
     else:
-        mask = 0x0000ffff & (~0x03 << (stage-4))    # clear passwd and target stage, keep other stages
-        cur = getRegister(ROSC_BASE+ROSC_FREQA) & mask
-        setRegister(ROSC_BASE+ROSC_FREQB, 0x96960000 | cur | (strength << (stage-4)))
+        stage_shift = 4 * (stage - 4)
+        mask = 0x0000ffff & (~(0x0f << stage_shift))    # clear passwd and target stage, keep other stages
+        cur = getRegister(ROSC_BASE+ROSC_FREQB) & mask
+        setRegister(ROSC_BASE+ROSC_FREQB, 0x96960000 | cur | (strength << stage_shift))
+
         
 def roscSetDiv(val):
     '''0 = divide by 32, otherwise divide by val.'''
@@ -179,14 +182,14 @@ def measureFreqs():
     f_clk_usb  = freqCountKHz(CLOCKS_FC0_SRC_VALUE_CLK_USB);
     f_clk_adc  = freqCountKHz(CLOCKS_FC0_SRC_VALUE_CLK_ADC);
     f_clk_rtc  = freqCountKHz(CLOCKS_FC0_SRC_VALUE_CLK_RTC);
-    print ("pll_sys  = %dkHz\n" % f_pll_sys)
-    print ("pll_usb  = %dkHz\n" % f_pll_usb)
-    print ("rosc     = %dkHz\n" % f_rosc)
-    print ("clk_sys  = %dkHz\n" % f_clk_sys)
-    print ("clk_peri = %dkHz\n" % f_clk_peri)
-    print ("clk_usb  = %dkHz\n" % f_clk_usb)
-    print ("clk_adc  = %dkHz\n" % f_clk_adc)
-    print ("clk_rtc  = %dkHz\n" % f_clk_rtc)
+    print ("pll_sys  = %dkHz" % f_pll_sys)
+    print ("pll_usb  = %dkHz" % f_pll_usb)
+    print ("rosc     = %dkHz" % f_rosc)
+    print ("clk_sys  = %dkHz" % f_clk_sys)
+    print ("clk_peri = %dkHz" % f_clk_peri)
+    print ("clk_usb  = %dkHz" % f_clk_usb)
+    print ("clk_adc  = %dkHz" % f_clk_adc)
+    print ("clk_rtc  = %dkHz" % f_clk_rtc)
     # Can't measure clk_ref / xosc as it is the ref
 
 
