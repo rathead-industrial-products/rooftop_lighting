@@ -121,6 +121,23 @@ def coreFifoEmpty():
 def coreFifoFull():
     return ((coreFifoStatus() & ~0x02) == 0)
 
+def getGPIOFunc(gpio):
+    '''Returns contents of GPIO control register'''
+    return (getRegister(IO_BANK0_BASE+(8*gpio+4)))
+    
+def setGPIOFunc(gpio, func):
+    '''Configures gpio to func'''
+    setRegister(IO_BANK0_BASE+(8*gpio+4), 0x0000001f & func)
+
+def getClkGPOUT0Ctl():
+    '''Returns contents of GPIO control register'''
+    return (getRegister(CLOCKS_BASE))
+    
+def setClkGPOUT0Ctl(src):
+    '''Configures gpio to func'''
+    setRegister(CLOCKS_BASE, 0x000001e0 & (src << 5))
+    
+
 def roscGetDrive():
     '''Returns a tuple of strength 0-3 for each stage 0-7'''
     a = getRegister(ROSC_BASE+ROSC_FREQA)        
@@ -191,6 +208,10 @@ def measureFreqs():
     print ("clk_adc  = %dkHz" % f_clk_adc)
     print ("clk_rtc  = %dkHz" % f_clk_rtc)
     # Can't measure clk_ref / xosc as it is the ref
+    
+def driveClkOutGPIO(clk):
+    '''Uses GPIOs 21,23,24,25'''
+    
 
 
  

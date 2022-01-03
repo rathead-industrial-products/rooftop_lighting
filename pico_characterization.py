@@ -53,8 +53,30 @@ def roscCharactorize():
             print (roscGetDrive(), next, (100*(next - prev))/prev)
             prev = next
 # main
+
+led = machine.Pin(25, machine.Pin.OUT)
+led.value(1)
+time.sleep(1)
+led.value(0)
+
+clkout = machine.Pin(21, machine.Pin.OUT)
+clkout.value(1)
+time.sleep(1)
+clkout.value(0)
+
+print (getGPIOFunc(21))
+setGPIOFunc(21, 8)
+print (getGPIOFunc(21))
+
+for i in range(11):
+    print (bin(getClkGPOUT0Ctl()))
+    setClkGPOUT0Ctl(i)
+    print (bin(getClkGPOUT0Ctl()))
+    time.sleep(1)
+
+
 #measureFreqs()
-roscCharactorize()
+#roscCharactorize()
 
 
 
